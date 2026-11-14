@@ -1,0 +1,132 @@
+{
+  "marca": "Imobiliária Exemplo",
+  "slug": "imob",
+  "cor": "#6d28d9",
+  "destino": "pagina",
+  "webhook_url": "SEU_WEBHOOK_AQUI",
+  "modo_envio": "json",
+  "paginas_base_url": "./",
+  "whatsapp_numero": "SEU_NUMERO_COM_DDI",
+  "ddi_padrao": "55",
+  "pergunta_avatar": {
+    "chave": "avatar",
+    "texto": "Antes de continuar, só me diz: por que você quer comprar um imóvel agora?",
+    "dica": "Mesmo imóvel, motivos diferentes. Me conta o seu."
+  },
+  "perguntas": [
+    {
+      "chave": "faixa",
+      "texto": "Quanto cabe por mês no seu bolso?",
+      "opcoes": ["Até R$ 2 mil", "De R$ 2 mil a R$ 4 mil", "Acima de R$ 4 mil / à vista"]
+    },
+    {
+      "chave": "prazo",
+      "texto": "Pra quando você quer resolver?",
+      "opcoes": ["Agora, nos próximos 30 dias", "Em até 6 meses", "Estou pesquisando"]
+    }
+  ],
+  "captura": {
+    "titulo": "Seu resultado está pronto",
+    "texto": "Pra onde eu mando o seu plano?",
+    "pedir_email": false,
+    "botao": "VER MEU RESULTADO"
+  },
+  "avatares": [
+    {
+      "id": "sair-aluguel",
+      "emoji": "🔑",
+      "opcao": "Quero sair do aluguel",
+      "nome": "Sair do aluguel",
+      "headline": "{nome}, em 30 anos de aluguel você paga *R$ 720 mil e nada é seu.*",
+      "sub": "R$ 2 mil de aluguel × 12 meses × 30 anos. Aqui a parcela fica no mesmo patamar e o imóvel é seu.",
+      "dores": [
+        "Todo mês o aluguel some e não sobra patrimônio.",
+        "O dono pode pedir o imóvel ou reajustar quando quiser.",
+        "Você não pode nem pregar um quadro sem pedir."
+      ],
+      "mecanismo": "Simulação lado a lado: aluguel atual × parcela do financiamento, usando o FGTS na entrada.",
+      "prova": {"texto": "[DEPOIMENTO REAL de alguém que saiu do aluguel]", "autor": "[Nome · saiu do aluguel]"},
+      "objecao": {"pergunta": "\"Não tenho dinheiro pra entrada.\"", "resposta": "Dá pra usar FGTS e parcelar parte da entrada direto com a construtora. A gente simula com você."},
+      "oferta": "Simulação gratuita: seu aluguel × sua parcela, com FGTS.",
+      "cta": "QUERO MINHA SIMULAÇÃO",
+      "cta_url": "",
+      "whatsapp": {
+        "d0": "Oi {nome}! Aqui é da Imobiliária Exemplo 🔑 Você quer sair do aluguel e cabe {faixa} por mês. Montei sua página: {link}",
+        "d1": "{nome}, a dúvida de quase todo mundo: \"e a entrada?\". Dá pra usar FGTS e parcelar parte com a construtora. Quer que eu simule com o seu aluguel atual?",
+        "d3": "{nome}, cada mês de aluguel é dinheiro que não volta. Bora ver a parcela que fica no lugar dele?"
+      }
+    },
+    {
+      "id": "casa-sogra",
+      "emoji": "🏡",
+      "opcao": "Quero sair da casa da sogra",
+      "nome": "Sair da casa da sogra",
+      "headline": "{nome}, chegou a hora de ter *a SUA casa, com as SUAS regras.*",
+      "sub": "Pra quem mora com a família e quer a independência do próprio lar.",
+      "dores": [
+        "Você não tem privacidade nem na própria rotina.",
+        "Toda decisão da casa precisa de aprovação de alguém.",
+        "Você quer receber os amigos no SEU espaço."
+      ],
+      "mecanismo": "Plano de 3 passos: aprovação de crédito, entrada facilitada e chaves na mão. A gente cuida da papelada.",
+      "prova": {"texto": "[DEPOIMENTO REAL de um casal que saiu da casa da família]", "autor": "[Nome · casado]"},
+      "objecao": {"pergunta": "\"Meu nome é novo, será que aprova?\"", "resposta": "A gente faz a análise de crédito antes, sem compromisso, e te mostra o caminho mais rápido."},
+      "oferta": "Análise de crédito gratuita e as chaves no seu nome.",
+      "cta": "QUERO MINHA INDEPENDÊNCIA",
+      "cta_url": "",
+      "whatsapp": {
+        "d0": "Oi {nome}! Aqui é da Imobiliária Exemplo 🏡 Você quer a sua casa, com as suas regras. Separei sua página: {link}",
+        "d1": "{nome}, muita gente trava no \"será que meu crédito aprova?\". Faço a análise antes, sem compromisso. Bora?",
+        "d3": "{nome}, imagina o próximo domingo na SUA varanda. Quer agendar a visita?"
+      }
+    },
+    {
+      "id": "primeira-casa",
+      "emoji": "🏠",
+      "opcao": "É minha primeira casa",
+      "nome": "Primeira casa",
+      "headline": "{nome}, a primeira casa a gente não esquece. *Eu te guio do zero até as chaves.*",
+      "sub": "Pra quem nunca comprou imóvel e tem medo de errar.",
+      "dores": [
+        "Você não entende de financiamento, ITBI e escritura.",
+        "Tem medo de cair em armadilha.",
+        "Não sabe quanto precisa juntar."
+      ],
+      "mecanismo": "Passo a passo da primeira compra: simulação, documentos, aprovação, vistoria e entrega, com um corretor do seu lado em cada etapa.",
+      "prova": {"texto": "[DEPOIMENTO REAL de quem comprou o primeiro imóvel]", "autor": "[Nome · primeira compra]"},
+      "objecao": {"pergunta": "\"Tenho medo dos custos escondidos.\"", "resposta": "Te passamos a planilha completa: entrada, ITBI, escritura e cartório, antes de assinar qualquer coisa."},
+      "oferta": "Guia da primeira compra + simulação gratuita.",
+      "cta": "QUERO COMPRAR MINHA PRIMEIRA CASA",
+      "cta_url": "",
+      "whatsapp": {
+        "d0": "Oi {nome}! Aqui é da Imobiliária Exemplo 🏠 Primeira casa! Fiz uma página explicando tudo do zero: {link}",
+        "d1": "{nome}, o medo nº 1 da primeira compra são os custos escondidos. Te mando a planilha com ITBI, escritura e cartório?",
+        "d3": "{nome}, bora dar o primeiro passo? Uma simulação de 10 minutos já te mostra o caminho."
+      }
+    },
+    {
+      "id": "investidor-temporada",
+      "emoji": "🧳",
+      "opcao": "Quero investir pra alugar por temporada",
+      "nome": "Investidor short stay",
+      "headline": "{nome}, esse apartamento como *máquina de renda de temporada.*",
+      "sub": "Pra investidor que quer rentabilidade com locação de curta temporada.",
+      "dores": [
+        "Sua renda fixa rende pouco perto do potencial do imóvel.",
+        "Você não sabe a ocupação real da região.",
+        "Gestão de hóspede dá trabalho."
+      ],
+      "mecanismo": "Estudo de ocupação e diária média da região, projeção de rentabilidade e indicação de gestão terceirizada.",
+      "prova": {"texto": "[DEPOIMENTO REAL de investidor de temporada]", "autor": "[Nome · investidor]"},
+      "objecao": {"pergunta": "\"E se ficar vazio?\"", "resposta": "Te mostramos a ocupação histórica da região e o cenário conservador antes da compra."},
+      "oferta": "Estudo de rentabilidade de temporada.",
+      "cta": "QUERO O ESTUDO DE RENTABILIDADE",
+      "cta_url": "",
+      "whatsapp": {
+        "d0": "Olá {nome}! Aqui é da Imobiliária Exemplo 🧳 Investimento em temporada. Seu estudo começa aqui: {link}",
+        "d1": "{nome}, a pergunta de todo investidor: \"e se ficar vazio?\". Tenho a ocupação histórica da região e o cenário conservador. Te mando?",
+        "d3": "{nome}, quer ver a projeção de renda com gestão terceirizada? 15 minutos."
+      }
+    }
+  ]
+}

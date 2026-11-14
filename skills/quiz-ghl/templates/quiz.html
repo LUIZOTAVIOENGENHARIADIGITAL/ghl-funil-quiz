@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Quiz</title>
+<!-- Funil de Quiz · template do repositório ghl-funil-quiz (MIT)
+     - 1 pergunta por tela, barra de progresso, captura ANTES do resultado
+     - UTM / fbclid / gclid capturados da URL e enviados como campos ocultos
+     - POST pro "Webhook de entrada" (Inbound Webhook) de um fluxo de trabalho do GHL
+     - redirect por avatar (destino "pagina") ou tela de WhatsApp (destino "whatsapp")
+     A configuração fica no bloco <script id="quiz-config"> abaixo (o gerar.py preenche). -->
+<style>
+  :root{--cor:#6d28d9;--ink:#0f172a;--mute:#64748b;--line:#e2e8f0;--bg:#f1f5f9;--ok:#16a34a}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;min-height:100vh}
+  .wrap{max-width:480px;margin:0 auto;padding:18px 14px 40px}
+  .card{background:#fff;border-radius:18px;box-shadow:0 16px 44px rgba(15,23,42,.1);overflow:hidden}
+  .head{padding:16px 18px 0}
+  .marca{font-weight:800;font-size:.95rem}
+  .prog{height:7px;background:#eef2ff;border-radius:10px;margin:12px 0 4px;overflow:hidden}
+  .prog i{display:block;height:100%;width:0;background:var(--cor);transition:width .35s}
+  .pt{font-size:.72rem;color:var(--mute);font-weight:700;text-align:right}
+  .body{padding:14px 18px 22px;min-height:330px}
+  h1{font-size:1.3rem;line-height:1.25;margin-bottom:6px}
+  .dica{color:var(--mute);font-size:.88rem;margin-bottom:14px}
+  .opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-radius:12px;padding:14px;margin-bottom:9px;font-size:1rem;font-weight:600;cursor:pointer;color:var(--ink);transition:.15s}
+  .opt:hover,.opt:focus{border-color:var(--cor);outline:none}
+  .opt .e{font-size:1.3rem;width:28px;text-align:center}
+  input{width:100%;padding:14px 12px;border:1.5px solid var(--line);border-radius:10px;margin-bottom:10px;font-size:1rem}
+  input:focus{border-color:var(--cor);outline:none}
+  .btn{display:block;width:100%;background:var(--ok);color:#fff;border:0;border-radius:12px;padding:16px;font-size:1.02rem;font-weight:900;cursor:pointer}
+  .btn[disabled]{opacity:.6;cursor:wait}
+  .voltar{background:none;border:0;color:var(--mute);font-size:.82rem;margin-top:12px;cursor:pointer}
+  .erro{color:#b91c1c;font-size:.82rem;margin:-4px 0 10px;display:none}
+  .lgpd{font-size:.72rem;color:var(--mute);text-align:center;margin-top:10px;line-height:1.4}
+  .fim{text-align:center;padding:50px 6px}
+  .spin{width:42px;height:42px;border:5px solid #eef2ff;border-top-color:var(--cor);border-radius:50%;margin:0 auto 14px;animation:s .8s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+  <div class="head"><div class="marca" id="marca"></div><div class="prog"><i id="bar"></i></div><div class="pt" id="pt"></div></div>
+  <div class="body" id="body"></div>
+</div></div>
+
+<script id="quiz-config" type="application/json">
+{"marca":"Imobiliária Exemplo","slug":"imob","cor":"#6d28d9","destino":"pagina","webhook_url":"SEU_WEBHOOK_AQUI","modo_envio":"json","paginas_base_url":"./","whatsapp_numero":"SEU_NUMERO_COM_DDI","ddi_padrao":"55",
+ "pergunta_avatar":{"chave":"avatar","texto":"Antes de continuar, só me diz: por que você quer comprar um imóvel agora?","dica":"Mesmo imóvel, motivos diferentes. Me conta o seu."},
+ "perguntas":[{"chave":"faixa","texto":"Quanto cabe por mês no seu bolso?","opcoes":["Até R$ 2 mil","De R$ 2 mil a R$ 4 mil","Acima de R$ 4 mil / à vista"]},{"chave":"prazo","texto":"Pra quando você quer resolver?","opcoes":["Agora, nos próximos 30 dias","Em até 6 meses","Estou pesquisando"]}],
+ "captura":{"titulo":"Seu resultado está pronto","texto":"Pra onde eu mando o seu plano?","pedir_email":false,"botao":"VER MEU RESULTADO"},
+ "avatares":[{"id":"sair-aluguel","emoji":"🔑","opcao":"Quero sair do aluguel","nome":"Sair do aluguel"},{"id":"casa-sogra","emoji":"🏡","opcao":"Quero sair da casa da sogra","nome":"Sair da casa da sogra"},{"id":"primeira-casa","emoji":"🏠","opcao":"É minha primeira casa","nome":"Primeira casa"},{"id":"investidor-temporada","emoji":"🧳","opcao":"Quero investir pra alugar por temporada","nome":"Investidor short stay"}]}
+</script>
+
+<script>
+(function(){
+  var C = JSON.parse(document.getElementById('quiz-config').textContent);
+  document.documentElement.style.setProperty('--cor', C.cor || '#6d28d9');
+  document.title = C.marca + ' · Quiz';
+  document.getElementById('marca').textContent = C.marca;
+
+  // ── campos ocultos: UTMs, click IDs e origem ──
+  var qs = new URLSearchParams(location.search);
+  var OCULTOS = {};
+  ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','fbclid','gclid'].forEach(function(k){
+    var v = qs.get(k);
+    if (!v) { try { v = sessionStorage.getItem('quiz_' + k); } catch(e){} }
+    if (v) { OCULTOS[k] = v; try { sessionStorage.setItem('quiz_' + k, v); } catch(e){} }
+  });
+
+  var TELAS = 1 + C.perguntas.length + 1;  // avatar + perguntas + captura
+  var tela = 0, resp = {}, historico = [];
+  var body = document.getElementById('body');
+
+  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function prog(){ document.getElementById('bar').style.width = (tela / TELAS * 100) + '%';
+    document.getElementById('pt').textContent = tela < TELAS ? 'Etapa ' + (tela + 1) + ' de ' + TELAS : 'Pronto!'; }
+  function avatar(){ return C.avatares.filter(function(a){ return a.id === resp.avatar; })[0]; }
+
+  function render(){
+    prog();
+    var h = '';
+    if (tela === 0) {
+      h = '<h1>' + esc(C.pergunta_avatar.texto) + '</h1><div class="dica">' + esc(C.pergunta_avatar.dica || '') + '</div>' +
+        C.avatares.map(function(a){ return '<button class="opt" data-k="avatar" data-v="' + esc(a.id) + '"><span class="e">' + esc(a.emoji || '•') + '</span>' + esc(a.opcao) + '</button>'; }).join('');
+    } else if (tela <= C.perguntas.length) {
+      var p = C.perguntas[tela - 1];
+      h = '<h1>' + esc(p.texto) + '</h1><div class="dica">Toque numa opção.</div>' +
+        p.opcoes.map(function(o){ return '<button class="opt" data-k="' + esc(p.chave) + '" data-v="' + esc(o) + '">' + esc(o) + '</button>'; }).join('');
+    } else {
+      var cap = C.captura || {};
+      h = '<h1>' + esc(cap.titulo || 'Seu resultado está pronto') + '</h1><div class="dica">' + esc(cap.texto || '') + '</div>' +
+        '<form id="f" novalidate><input name="nome" placeholder="Seu primeiro nome" autocomplete="given-name" required>' +
+        '<input name="telefone" placeholder="WhatsApp com DDD" inputmode="tel" autocomplete="tel" required><div class="erro" id="et">Confira o WhatsApp com DDD.</div>' +
+        (cap.pedir_email ? '<input name="email" type="email" placeholder="Seu melhor e-mail" autocomplete="email">' : '') +
+        '<button class="btn" id="enviar">' + esc(cap.botao || 'VER MEU RESULTADO') + ' →</button>' +
+        '<div class="lgpd">🔒 Usamos seus dados só pra te enviar o resultado e falar com você sobre ele.</div></form>';
+    }
+    if (tela > 0) h += '<button class="voltar" id="voltar">← voltar</button>';
+    body.innerHTML = h;
+    Array.prototype.forEach.call(body.querySelectorAll('.opt'), function(b){
+      b.addEventListener('click', function(){ resp[b.dataset.k] = b.dataset.v; historico.push(tela); tela++; render(); });
+    });
+    var v = document.getElementById('voltar'); if (v) v.addEventListener('click', function(){ tela = historico.pop() || 0; render(); });
+    var f = document.getElementById('f'); if (f) f.addEventListener('submit', enviar);
+  }
+
+  function telefone(raw){
+    var d = String(raw).replace(/\D/g, '');
+    if (d.length < 10) return null;
+    if (d.length <= 11 && C.ddi_padrao) d = C.ddi_padrao + d;   // BR: DDD + número
+    return '+' + d;
+  }
+
+  function payload(nome, tel, email){
+    var a = avatar(), r = {};
+    C.perguntas.forEach(function(p){ r['quiz_' + p.chave] = resp[p.chave] || ''; });
+    var linhas = [C.pergunta_avatar.texto + ' → ' + a.opcao].concat(C.perguntas.map(function(p){ return p.texto + ' → ' + (resp[p.chave] || ''); }));
+    var out = {
+      first_name: nome, phone: tel, email: email || '',
+      quiz_nome: C.slug, quiz_avatar: a.id, quiz_avatar_nome: a.nome,
+      quiz_respostas: linhas.join(' | '), quiz_pagina: urlPagina(a, nome),
+      tags: 'quiz:' + C.slug + ',quiz:avatar-' + a.id,
+      page_url: location.href.split('#')[0], referrer: document.referrer || '', submitted_at: new Date().toISOString()
+    };
+    Object.keys(r).forEach(function(k){ out[k] = r[k]; });
+    Object.keys(OCULTOS).forEach(function(k){ out[k] = OCULTOS[k]; });
+    return out;
+  }
+
+  function urlPagina(a, nome){
+    var base = C.paginas_base_url || './';
+    if (base.slice(-1) !== '/') base += '/';
+    var p = new URLSearchParams(OCULTOS); p.set('nome', nome);
+    return new URL(base + a.id + '.html?' + p.toString(), location.href).href;
+  }
+
+  // POST pro Webhook de entrada do GHL. Sem retry automático (evita lead duplicado).
+  function post(data){
+    var url = C.webhook_url || '';
+    if (!url || url.indexOf('SEU_WEBHOOK') === 0) { console.warn('[quiz] webhook_url não configurado: lead NÃO enviado', data); return Promise.resolve('sem-webhook'); }
+    var ctrl = ('AbortController' in window) ? new AbortController() : null;
+    var t = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 5000);
+    var opt = C.modo_envio === 'no-cors'
+      ? { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body: JSON.stringify(data), keepalive:true }
+      : { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data), keepalive:true };
+    if (ctrl) opt.signal = ctrl.signal;
+    return fetch(url, opt).then(function(){ clearTimeout(t); return 'ok'; })
+      .catch(function(e){ clearTimeout(t); console.error('[quiz] falha no envio (veja CORS/modo_envio no README)', e); return 'erro'; });
+  }
+
+  function enviar(ev){
+    ev.preventDefault();
+    var f = ev.target, nome = f.nome.value.trim().split(/\s+/)[0], tel = telefone(f.telefone.value), email = f.email ? f.email.value.trim() : '';
+    document.getElementById('et').style.display = tel ? 'none' : 'block';
+    if (!nome || !tel) return;
+    document.getElementById('enviar').disabled = true;
+    var a = avatar(), data = payload(nome, tel, email);
+    tela = TELAS; prog();
+    body.innerHTML = '<div class="fim"><div class="spin"></div><b>Montando o seu resultado…</b></div>';
+    if (window.fbq) { try { fbq('track', 'Lead', {content_name: 'quiz:' + C.slug + ':' + a.id}); } catch(e){} }
+    post(data).then(function(){
+      if (C.destino === 'whatsapp') {
+        var wa = (C.whatsapp_numero && !/SEU_/.test(C.whatsapp_numero)) ? '<a class="btn" style="text-decoration:none;margin-top:16px;background:#25d366" href="https://wa.me/' + C.whatsapp_numero.replace(/\D/g,'') + '?text=' + encodeURIComponent('Oi! Acabei de fazer o quiz (' + a.nome + ').') + '">Abrir o WhatsApp</a>' : '';
+        body.innerHTML = '<div class="fim"><div style="font-size:3rem">💬</div><h1>Pronto, ' + esc(nome) + '!</h1><p class="dica">Acabei de te mandar o seu resultado no WhatsApp.</p>' + wa + '</div>';
+      } else {
+        location.href = data.quiz_pagina;
+      }
+    });
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
