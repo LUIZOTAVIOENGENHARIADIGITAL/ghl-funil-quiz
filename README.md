@@ -15,6 +15,8 @@ A conta que motiva tudo:
 
 > Quem vende pra todo mundo não vende pra ninguém. E o quiz só funciona se **cada avatar tiver a sua página de verdade**: dor, depoimento e objeção próprios. Trocar só a headline não converte.
 
+> 📋 **Só quer os prompts?** Veja [PROMPTS.md](PROMPTS.md): um pra vibecodar o quiz no **AI Studio do GHL** e outro pra **Claude Code, Codex** ou qualquer agente local.
+
 ## Pra quem é
 
 Aluno da **Comunidade GHL Brasil** (e qualquer pessoa que usa GoHighLevel) que atende mais de um público, ou vende o mesmo produto por motivos diferentes: imobiliária (sair do aluguel, primeira casa, investidor), revenda de veículos (família cresceu, 13º, promoção), clínica, serviços, infoproduto, agência.
